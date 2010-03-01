@@ -7,7 +7,6 @@ import os
 BASE = 'http://hg.python.org/'
 CSET_URL = BASE + '%s/rev/%s'
 FROM = '%s <hg@python.org>'
-NOTIFY = 'dirkjan@ochtman.nl'
 
 def send(sub, sender, to, body):
 	msg = MIMEMultipart()
@@ -41,7 +40,11 @@ def changegroup(ui, repo, **kwargs):
 	
 	body.append('--')
 	body.append('Repository URL: %s%s' % (BASE, path))
-	
 	sender = FROM % os.environ.get('HGPUSHER', 'local')
+	to = ui.config('mail', 'notify', None)
+	if to is None:
+		print 'no email address configured'
+		return
+	
 	send(csets + ' in %s' % path, sender, NOTIFY, '\n'.join(body))
 	print 'notified %s of %s' % (NOTIFY, csets)
