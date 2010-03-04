@@ -1,6 +1,6 @@
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from mercurial import cmdutil
+from mercurial import cmdutil, patch
 import smtplib
 import os
 
@@ -31,6 +31,14 @@ def incoming(ui, repo, **kwargs):
 	body = ['%s pushed %s to %s:' % (user, str(ctx), path), '']
 	body += [CSET_URL % (path, ctx)]
 	body += log.splitlines()
+	
+	diffopts = patch.diffopts(repo.ui, {'git': True, 'showfunc': True})
+	parents = ctx.parents()
+	node1 = parents and parents[0].node() or nullid
+	node2 = ctx.node()
+	differ = patch.diff(repo, node1, node2, opts=diffopts)
+	body.append(''.join(chunk for chunk in differ))
+	
 	body.append('--')
 	body.append('Repository URL: %s%s' % (BASE, path))
 
