@@ -27,9 +27,11 @@ def changegroup(ui, repo, **kwargs):
 		displayer.show(repo[i])
 	
 	num = len(displayer.hunk)
+	user = os.environ.get('HGPUSHER', 'local')
 	path = '/'.join(repo.root.split('/')[4:])
+	
 	csets = ('%s new ' % num) + ('changesets' if num > 1 else 'changeset')
-	body = ['%s in %s:' % (csets, path), '']
+	body = ['%s pushed %s to %s:' % (user, csets, path), '']
 	for rev, log in sorted(displayer.hunk.iteritems()):
 		lines = log.splitlines()
 		short = lines[0].rsplit(':', 1)[1]
@@ -40,11 +42,10 @@ def changegroup(ui, repo, **kwargs):
 	
 	body.append('--')
 	body.append('Repository URL: %s%s' % (BASE, path))
-	sender = FROM % os.environ.get('HGPUSHER', 'local')
 	to = ui.config('mail', 'notify', None)
 	if to is None:
 		print 'no email address configured'
 		return
 	
-	send(csets + ' in %s' % path, sender, NOTIFY, '\n'.join(body))
-	print 'notified %s of %s' % (NOTIFY, csets)
+	send(csets + ' in %s' % path, FROM % user, to, '\n'.join(body))
+	print 'notified %s of %s' % (to, csets)
