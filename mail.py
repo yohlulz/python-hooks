@@ -19,33 +19,32 @@ def send(sub, sender, to, body):
 	smtp.sendmail(sender, msg['To'], msg.as_string())
 	smtp.close()
 
-def changegroup(ui, repo, **kwargs):
+def incoming(ui, repo, **kwargs):
 	
 	displayer = cmdutil.changeset_printer(ui, repo, False, False, True)
-	first = repo[kwargs['node']].rev()
-	for i in range(first, len(repo)):
-		displayer.show(repo[i])
-	
-	num = len(displayer.hunk)
+	ctx = repo[kwargs['node']]
+	displayer.show(ctx)
+	log = displayer.hunk[ctx.rev()]
 	user = os.environ.get('HGPUSHER', 'local')
 	path = '/'.join(repo.root.split('/')[4:])
 	
-	csets = ('%s new ' % num) + ('changesets' if num > 1 else 'changeset')
-	body = ['%s pushed %s to %s:' % (user, csets, path), '']
-	for rev, log in sorted(displayer.hunk.iteritems()):
-		lines = log.splitlines()
-		short = lines[0].rsplit(':', 1)[1]
-		url = CSET_URL % (path, short)
-		body.append(url)
-		body += lines
-		body.append('')
-	
+	body = ['%s pushed %s to %s:' % (user, str(ctx), path), '']
+	body += [CSET_URL % (path, ctx)]
+	body += log.splitlines()
 	body.append('--')
 	body.append('Repository URL: %s%s' % (BASE, path))
+
 	to = ui.config('mail', 'notify', None)
 	if to is None:
 		print 'no email address configured'
 		return
 	
-	send(csets + ' in %s' % path, FROM % user, to, '\n'.join(body))
-	print 'notified %s of %s' % (to, csets)
+	desc = ctx.description().splitlines()[0]
+	if len(desc) > 80:
+		desc = desc[:80]
+		if ' ' in desc:
+			desc = desc.rsplit(' ', 1)[0]
+	
+	subj = '%s in %s: %s' % (ctx, path, desc)
+	send(subj, FROM % user, to, '\n'.join(body))
+	print 'notified %s of incoming changeset %s' % (to, ctx)
