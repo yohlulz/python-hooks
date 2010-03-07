@@ -1,6 +1,7 @@
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from mercurial import cmdutil, patch
+from mercurial.node import nullid
 import smtplib
 import os
 
