@@ -6,7 +6,7 @@ import os
 
 BASE = 'http://hg.python.org/'
 CSET_URL = BASE + '%s/rev/%s'
-FROM = '%s <hg@python.org>'
+FROM = '%s <python-checkins@python.org>'
 
 def send(sub, sender, to, body):
 	msg = MIMEMultipart()
