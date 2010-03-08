@@ -30,7 +30,8 @@ def incoming(ui, repo, **kwargs):
 	
 	body = ['%s pushed %s to %s:' % (user, str(ctx), path), '']
 	body += [CSET_URL % (path, ctx)]
-	body += log.splitlines()
+	body += log.splitlines()[:-1]
+	body += ['files:       ' + ', '.join(ctx.files()), '']
 	
 	diffopts = patch.diffopts(repo.ui, {'git': True, 'showfunc': True})
 	parents = ctx.parents()
@@ -53,6 +54,6 @@ def incoming(ui, repo, **kwargs):
 		if ' ' in desc:
 			desc = desc.rsplit(' ', 1)[0]
 	
-	subj = '%s in %s: %s' % (ctx, path, desc)
+	subj = '%s: %s' % (path, desc)
 	send(subj, FROM % user, to, '\n'.join(body))
 	print 'notified %s of incoming changeset %s' % (to, ctx)
