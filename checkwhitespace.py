@@ -18,7 +18,7 @@ from mercurial import cmdutil
 
 def check_file(ui, repo, path, rev):
     """Check a particular (file, revision) pair for whitespace issues.
-    
+
     Return True if whitespace problems exist, else False.
 
     """
