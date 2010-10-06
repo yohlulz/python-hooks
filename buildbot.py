@@ -1,4 +1,4 @@
-# hgbuildbot.py - mercurial hooks for buildbot
+# buildbot.py - mercurial changegroup hook for buildbot
 #
 # Copyright 2007 Frederic Leroy <fredo@starox.org>
 # Adapted for Python 2010 Georg Brandl <georg@python.org>
@@ -9,23 +9,14 @@
 # hook extension to send change notifications to buildbot when a changeset is
 # brought into the repository from elsewhere.
 #
-# default mode is to use mercurial branch
-#
 # to use, configure hgbuildbot in .hg/hgrc like this:
 #
 #   [hooks]
-#   changegroup = python:buildbot.changes.hgbuildbot.hook
+#   changegroup = python:/path/to/buildbot.py:hook
 #
 #   [hgbuildbot]
-#   # config items go in here
-#
-# config items:
-#
-# REQUIRED:
-#   master = host:port                   # host to send buildbot changes
-#
-# OPTIONAL:
-#   prefix = prefix/                     # prefix for all file names
+#   master = host:port
+#   prefix = python/   # optional!
 
 import os
 import sys
