@@ -12,10 +12,10 @@
 # to use, configure hgbuildbot in .hg/hgrc like this:
 #
 #   [hooks]
-#   changegroup = python:/path/to/buildbot.py:hook
+#   changegroup.buildbot = python:/path/to/buildbot.py:hook
 #
 #   [hgbuildbot]
-#   master = host:port
+#   master = host1:port1,host2:port2,...
 #   prefix = python/   # optional!
 
 import os
@@ -36,14 +36,30 @@ except ImportError:
 
 sys.path.append('/data/buildbot/lib/python')
 
-from buildbot.clients import sendchange
-from twisted.internet import defer, reactor
+
+def sendchanges(master, changes):
+    # send change information to one master
+    from buildbot.clients import sendchange
+    from twisted.internet import defer, reactor
+
+    s = sendchange.Sender(master, None)
+    d = defer.Deferred()
+    reactor.callLater(0, d.callback, None)
+    
+    def send(res, c):
+        return s.send(c['branch'], c['revision'], c['comments'],
+                      c['files'], c['username'])
+    for change in changes:
+        d.addCallback(send, change)
+    #d.addCallbacks(s.printSuccess, s.printFailure)
+    d.addBoth(s.stop)
+    s.run()
 
 
 def hook(ui, repo, hooktype, node=None, source=None, **kwargs):
     # read config parameters
-    master = ui.config('hgbuildbot', 'master')
-    if not master:
+    masters = ui.configlist('hgbuildbot', 'master')
+    if not masters:
         ui.write("* You must add a [hgbuildbot] section to .hg/hgrc in "
                  "order to use buildbot hook\n")
         return
@@ -51,20 +67,14 @@ def hook(ui, repo, hooktype, node=None, source=None, **kwargs):
 
     if hooktype != 'changegroup':
         ui.status('hgbuildbot: hook %s not supported\n' % hooktype)
+        return
 
-    s = sendchange.Sender(master, None)
-    d = defer.Deferred()
-    reactor.callLater(0, d.callback, None)
-    # process changesets
-    def _send(res, c):
-        ui.status("rev %s sent\n" % c['revision'])
-        return s.send(c['branch'], c['revision'], c['comments'],
-                      c['files'], c['username'])
-
+    # find changesets and collect info
+    changes = []
     start = repo[node].rev()
     end = len(repo)
     for rev in xrange(start, end):
-        # send changeset
+        # read changeset
         node = repo.changelog.node(rev)
         manifest, user, (time, timezone), files, desc, extra = repo.changelog.read(node)
         parents = [p for p in repo.changelog.parents(node) if p != nullid]
@@ -72,17 +82,19 @@ def hook(ui, repo, hooktype, node=None, source=None, **kwargs):
         # merges don't always contain files, but at least one file is required by buildbot
         if len(parents) > 1 and not files:
             files = ["merge"]
+        # add artificial prefix if configured
         files = [prefix + f for f in files]
-        change = {
-            'master': master,
+        changes.append({
             'username': user,
             'revision': hex(node),
             'comments': desc,
             'files': files,
             'branch': branch,
-        }
-        d.addCallback(_send, change)
-
-    d.addCallbacks(s.printSuccess, s.printFailure)
-    d.addBoth(s.stop)
-    s.run()
+        })
+ 
+    for master in masters:
+        # fork off for each master: reactor can only run once per process
+        child_pid = os.fork()
+        if child_pid == 0:
+            sendchanges(master, changes)
+            return
