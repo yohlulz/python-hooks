@@ -31,8 +31,9 @@ def incoming(ui, repo, **kwargs):
 
     body = ['%s pushed %s to %s:' % (user, str(ctx), path), '']
     body += [CSET_URL % (path, ctx)]
-    body += log.splitlines()[:-1]
-    body += ['files:       ' + ', '.join(ctx.files()), '']
+    body += log.splitlines()[:-2]
+    body += ['summary:\n  ' + ctx.description(), '']
+    body += ['files:\n  ' + '\n  '.join(ctx.files()), '']
 
     diffopts = patch.diffopts(repo.ui, {'git': True, 'showfunc': True})
     parents = ctx.parents()
