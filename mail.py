@@ -48,7 +48,7 @@ def incoming(ui, repo, **kwargs):
     to = ui.config('mail', 'notify', None)
     if to is None:
         print 'no email address configured'
-        return
+        return False
 
     desc = ctx.description().splitlines()[0]
     if len(desc) > 80:
@@ -59,3 +59,4 @@ def incoming(ui, repo, **kwargs):
     subj = '%s: %s' % (path, desc)
     send(subj, FROM % user, to, '\n'.join(body))
     print 'notified %s of incoming changeset %s' % (to, ctx)
+    return False

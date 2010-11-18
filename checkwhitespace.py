@@ -106,6 +106,7 @@ def check_whitespace(ui, repo, **kwargs):
         ui.warn(msg)
         # return value of 'True' indicates failure
         return True
+    return False
 
 def check_whitespace_single(ui, repo, **kwargs):
     """Check whitespace for a single changeset.
@@ -125,3 +126,4 @@ def check_whitespace_single(ui, repo, **kwargs):
         ui.warn(msg)
         # return value of 'True' indicates failure
         return True
+    return False
