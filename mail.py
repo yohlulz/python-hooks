@@ -50,13 +50,19 @@ def incoming(ui, repo, **kwargs):
         print 'no email address configured'
         return False
 
+    branch = ctx.branch()
+    if branch == 'default':
+        branch_insert = ''
+    else:
+        branch_insert = ' (%s)' % branch
+
     desc = ctx.description().splitlines()[0]
     if len(desc) > 80:
         desc = desc[:80]
         if ' ' in desc:
             desc = desc.rsplit(' ', 1)[0]
 
-    subj = '%s: %s' % (path, desc)
+    subj = '%s%s: %s' % (path, branch_insert, desc)
     send(subj, FROM % user, to, '\n'.join(body))
     print 'notified %s of incoming changeset %s' % (to, ctx)
     return False
