@@ -63,6 +63,9 @@ def incoming(ui, repo, **kwargs):
             desc = desc.rsplit(' ', 1)[0]
 
     subj = '%s%s: %s' % (path, branch_insert, desc)
+    if len(parents) > 1:
+        subj = "merge in " + subj
+
     send(subj, FROM % user, to, '\n'.join(body))
     print 'notified %s of incoming changeset %s' % (to, ctx)
     return False
