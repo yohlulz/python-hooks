@@ -9,8 +9,6 @@ BASE = 'http://hg.python.org/'
 CSET_URL = BASE + '%s/rev/%s'
 FROM = '%s <python-checkins@python.org>'
 
-# foo
-
 def send(sub, sender, to, body):
     msg = MIMEMultipart()
     msg['Subject'] = sub
@@ -21,8 +19,6 @@ def send(sub, sender, to, body):
     smtp.connect()
     smtp.sendmail(sender, msg['To'], msg.as_string())
     smtp.close()
-
-# bar
 
 def incoming(ui, repo, **kwargs):
 
