@@ -34,13 +34,14 @@ try:
 except ImportError:
     pass
 
+from twisted.internet import defer, reactor
+
 sys.path.append('/data/buildbot/lib/python')
 
 
 def sendchanges(master, changes):
     # send change information to one master
     from buildbot.clients import sendchange
-    from twisted.internet import defer, reactor
 
     s = sendchange.Sender(master, None)
     d = defer.Deferred()
@@ -53,7 +54,6 @@ def sendchanges(master, changes):
         d.addCallback(send, change)
     d.addCallbacks(s.printSuccess, s.printFailure)
     d.addBoth(s.stop)
-    s.run()
 
 
 def hook(ui, repo, hooktype, node=None, source=None, **kwargs):
@@ -93,8 +93,6 @@ def hook(ui, repo, hooktype, node=None, source=None, **kwargs):
         })
  
     for master in masters:
-        # fork off for each master: reactor can only run once per process
-        child_pid = os.fork()
-        if child_pid == 0:
-            sendchanges(master, changes)
-            return
+        sendchanges(master, changes)
+    reactor.run()
+
