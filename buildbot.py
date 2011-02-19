@@ -51,7 +51,7 @@ def sendchanges(master, changes):
                       c['files'], c['username'])
     for change in changes:
         d.addCallback(send, change)
-    #d.addCallbacks(s.printSuccess, s.printFailure)
+    d.addCallbacks(s.printSuccess, s.printFailure)
     d.addBoth(s.stop)
     s.run()
 
