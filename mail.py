@@ -14,7 +14,7 @@ def send(sub, sender, to, body):
     msg['Subject'] = sub
     msg['To'] = to
     msg['From'] = sender
-    msg.attach(MIMEText(body, _subtype='plain'))
+    msg.attach(MIMEText(body, _subtype='plain', _charset='utf8'))
     smtp = smtplib.SMTP()
     smtp.connect()
     smtp.sendmail(sender, msg['To'], msg.as_string())

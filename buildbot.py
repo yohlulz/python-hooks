@@ -87,7 +87,7 @@ def hook(ui, repo, hooktype, node=None, source=None, **kwargs):
         changes.append({
             'username': user,
             'revision': hex(node),
-            'comments': desc,
+            'comments': desc.decode('utf8', 'replace'),
             'files': files,
             'branch': branch,
         })
