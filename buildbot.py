@@ -48,8 +48,7 @@ def sendchanges(master, changes):
     reactor.callLater(0, d.callback, None)
     
     def send(res, c):
-        return s.send(c['branch'], c['revision'], c['comments'],
-                      c['files'], c['username'])
+        return s.send(**c)
     for change in changes:
         d.addCallback(send, change)
     d.addCallbacks(s.printSuccess, s.printFailure)
@@ -64,6 +63,7 @@ def hook(ui, repo, hooktype, node=None, source=None, **kwargs):
                  "order to use buildbot hook\n")
         return
     prefix = ui.config('hgbuildbot', 'prefix', '')
+    url = ui.config('hgbuildbot', 'rev_url', '')
 
     if hooktype != 'changegroup':
         ui.status('hgbuildbot: hook %s not supported\n' % hooktype)
@@ -85,9 +85,10 @@ def hook(ui, repo, hooktype, node=None, source=None, **kwargs):
         # add artificial prefix if configured
         files = [prefix + f for f in files]
         changes.append({
-            'username': user,
+            'user': user,
             'revision': hex(node),
             'comments': desc.decode('utf8', 'replace'),
+            'revlink': (url % {'rev': hex(node)}) if url else '',
             'files': files,
             'branch': branch,
         })
