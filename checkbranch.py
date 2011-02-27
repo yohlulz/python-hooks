@@ -22,8 +22,7 @@ def hook(ui, repo, node, **kwargs):
         n = repo.changelog.node(rev)
         ctx = repo[n]
         branch = ctx.branch()
-        if branch in ('trunk', 'legacy-trunk',
-                      '2.0', '2.1', '2.2', '2.3', '2.4', '3.0'):
+        if branch not in ('default', '3.2', '3.1', '2.7', '2.6', '2.5'):
             ui.warn(' - changeset %s on disallowed branch %r!\n'
                   % (ctx, branch))
             failed = True
