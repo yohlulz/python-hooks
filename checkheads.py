@@ -3,7 +3,7 @@ Mercurial hook to check that a new changegroup (a group of pushed changesets)
 doesn't create new heads on any branch.
 
 To use the changeset hook in a local repository, include something like the
-following in your hgrc file.
+following in its hgrc file.
 
 [hooks]
 pretxnchangegroup.checkheads = python:/home/hg/repos/hooks/checkheads.py:hook
