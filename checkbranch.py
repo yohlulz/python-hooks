@@ -3,7 +3,7 @@ Mercurial hook to check that individual changesets don't happen on a
 forbidden branch.
 
 To use the changeset hook in a local repository, include something like the
-following in your hgrc file.
+following in its hgrc file.
 
 [hooks]
 pretxnchangegroup.checkbranch = python:/home/hg/repos/hooks/checkbranch.py:hook
