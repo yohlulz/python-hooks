@@ -1,3 +1,9 @@
+"""
+Mercurial hook to send an email for each changeset to a specified address.
+
+Use as an "incoming" hook.
+"""
+
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from mercurial import cmdutil, patch
