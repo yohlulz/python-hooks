@@ -63,10 +63,10 @@ def incoming(ui, repo, **kwargs):
         if b in (b1, b2):
             bp = b2 if b == b1 else b1
             # normal case
-            branch_insert = ' (merge: %s -> %s)' % (bp, b)
+            branch_insert = ' (merge %s -> %s)' % (bp, b)
         else:
             # XXX really??
-            branch_insert = ' (merge: %s + %s -> %s)' % (b1, b2, b)
+            branch_insert = ' (merge %s + %s -> %s)' % (b1, b2, b)
     else:
         branch = ctx.branch()
         if branch == 'default':
