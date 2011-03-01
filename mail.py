@@ -39,7 +39,7 @@ def incoming(ui, repo, **kwargs):
     #body += ['%s pushed %s to %s:' % (user, str(ctx), path), '']
     body += [CSET_URL % (path, ctx)]
     body += [line for line in log.splitlines()[:-2]
-             if line != 'tag:         tip\n']
+             if line != 'tag:         tip']
     body += ['summary:\n  ' + ctx.description(), '']
     body += ['files:\n  ' + '\n  '.join(ctx.files()), '']
 
