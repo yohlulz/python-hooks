@@ -69,3 +69,4 @@ def incoming(ui, repo, **kwargs):
     send(subj, FROM % user, to, '\n'.join(body) + '\n')
     print 'notified %s of incoming changeset %s' % (to, ctx)
     return False
+
