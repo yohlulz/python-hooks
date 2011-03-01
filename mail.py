@@ -29,9 +29,11 @@ def incoming(ui, repo, **kwargs):
     user = os.environ.get('HGPUSHER', 'local')
     path = '/'.join(repo.root.split('/')[4:])
 
-    body = ['%s pushed %s to %s:' % (user, str(ctx), path), '']
+    body = []
+    #body += ['%s pushed %s to %s:' % (user, str(ctx), path), '']
     body += [CSET_URL % (path, ctx)]
-    body += log.splitlines()[:-2]
+    body += [line for line in log.splitlines()[:-2]
+             if line != 'tag:         tip\n']
     body += ['summary:\n  ' + ctx.description(), '']
     body += ['files:\n  ' + '\n  '.join(ctx.files()), '']
 
