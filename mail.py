@@ -42,7 +42,7 @@ def incoming(ui, repo, **kwargs):
     differ = patch.diff(repo, node1, node2, opts=diffopts)
     body.append(''.join(chunk for chunk in differ))
 
-    body.append('--')
+    body.append('-- ')
     body.append('Repository URL: %s%s' % (BASE, path))
 
     to = ui.config('mail', 'notify', None)
@@ -66,6 +66,6 @@ def incoming(ui, repo, **kwargs):
     if len(parents) > 1:
         subj = "merge in " + subj
 
-    send(subj, FROM % user, to, '\n'.join(body))
+    send(subj, FROM % user, to, '\n'.join(body) + '\n')
     print 'notified %s of incoming changeset %s' % (to, ctx)
     return False
