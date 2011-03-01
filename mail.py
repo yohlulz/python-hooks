@@ -1,7 +1,7 @@
 """
 Mercurial hook to send an email for each changeset to a specified address.
 
-Use as an "incoming" hook.
+For use as an "incoming" hook.
 """
 
 from email.mime.multipart import MIMEMultipart
