@@ -34,7 +34,8 @@ def check_file(ui, repo, path, rev):
         content = StringIO(repo[rev][path].data())
         reindenter = Reindenter(content)
         if reindenter.run():
-            ui.warn(" - file %s is not whitespace-normalized\n" % path)
+            ui.warn(" - file %s is not whitespace-normalized in %s\n"
+                    % (path, str(repo[rev])))
             return True
 
     # Check ReST files for tabs and trailing whitespace
@@ -42,11 +43,13 @@ def check_file(ui, repo, path, rev):
         lines = StringIO(repo[rev][path].data()).readlines()
         for line in lines:
             if '\t' in line:
-                ui.warn(" - file %s contains tabs\n" % path)
+                ui.warn(" - file %s contains tabs in %s\n"
+                        % (path, str(repo[rev])))
                 return True
 
             elif line.rstrip('\r\n') != line.rstrip('\r\n '):
-                ui.warn(" - file %s has trailing whitespace\n" % path)
+                ui.warn(" - file %s has trailing whitespace in %s\n"
+                        % (path, str(repo[rev])))
                 return True
 
     return False
@@ -67,7 +70,7 @@ def compare_revisions(repo, ui, rev1, rev2):
             bad_files += 1
     return bad_files
 
-def check_whitespace(ui, repo, **kwargs):
+def check_whitespace(ui, repo, node, **kwargs):
     """Check whitespace for an incoming changegroup.
 
     Suitable for use as a pretxnchangegroup hook.
@@ -76,32 +79,23 @@ def check_whitespace(ui, repo, **kwargs):
     bad_files = 0
 
     # revision number of first incoming changeset of the changegroup
-    first = repo[kwargs['node']].rev()
-
-    # Process each head in range first:tip (inclusive) separately
-    head_matcher = revset.match('heads(%d:)' % first)
-    for head in head_matcher(repo, range(len(repo))):
-        # Find the immediate pre-changegroup revisions that this head
-        # descends from.
-        source_pattern = ('(parents(%d:) - (%d:)) and ancestors(%d)' %
-                          (first, first, head))
-        source_matcher = revset.match(source_pattern)
-        sources = list(source_matcher(repo, range(len(repo))))
-
-        # Every revision already in the repo is assumed to be whitespace-clean,
-        # so it's enough to pick just one 'sources' revision and check files
-        # that have changed between that revision and 'head'.  (More generally,
-        # we could check only those files that have changed since *every*
-        # source revision, but it doesn't seem worth the extra effort involved
-        # in computing the list of changed files.)
-        if sources:
-            source = sources[0]
-        else:
-            # Could happen on the first push to an empty repository.
-            source = node.nullrev
-
-        # Check all modified and/or added files between source and head.
-        bad_files += compare_revisions(repo, ui, source, head)
+    start = repo[node].rev()
+    files = set()
+    heads = set([start])
+    # Find all heads in changegroup
+    for rev in xrange(start, len(repo)):
+        for p in repo.changelog.parentrevs(rev):
+            heads.discard(p)
+        heads.add(rev)
+        files.update(repo[rev].files())
+    # Process each head and check modified files in it
+    for head in heads:
+        ctx = repo[head]
+        for f in files:
+            if f not in ctx:
+                continue
+            if check_file(ui, repo, f, head):
+                bad_files += 1
 
     if bad_files:
         msg = ("* Run Tools/scripts/reindent.py on .py files or "
