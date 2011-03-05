@@ -24,6 +24,7 @@ import sys
 from mercurial.i18n import gettext as _
 from mercurial.node import bin, hex, nullid
 from mercurial.context import workingctx
+from mercurial.encoding import localstr, fromlocal
 
 # mercurial's on-demand-importing hacks interfere with the:
 #from zope.interface import Interface
@@ -50,6 +51,10 @@ def sendchanges(master, changes):
     def send(res, c):
         return s.send(**c)
     for change in changes:
+        for k, v in change.items():
+            # Yikes!
+            if isinstance(v, localstr):
+                change[k] = fromlocal(v).decode('utf8')
         d.addCallback(send, change)
     d.addCallbacks(s.printSuccess, s.printFailure)
     d.addBoth(s.stop)
