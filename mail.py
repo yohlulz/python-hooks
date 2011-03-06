@@ -11,6 +11,7 @@ from mercurial.node import nullid
 from mercurial.encoding import fromlocal
 import smtplib
 import os
+import sys
 
 BASE = 'http://hg.python.org/'
 CSET_URL = BASE + '%s/rev/%s'
@@ -32,6 +33,12 @@ def incoming(ui, repo, **kwargs):
     os.environ['TERM'] = 'dumb'
     ui.setconfig('ui', 'interactive', 'False')
     ui.setconfig('ui', 'formatted', 'False')
+    try:
+        colormod = sys.modules['hgext.color']
+    except KeyError:
+        pass
+    else:
+        colormod._styles.clear()
 
     displayer = cmdutil.changeset_printer(ui, repo, False, False, True)
     ctx = repo[kwargs['node']]
