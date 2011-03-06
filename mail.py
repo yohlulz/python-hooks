@@ -70,21 +70,23 @@ def incoming(ui, repo, **kwargs):
         print 'no email address configured'
         return False
 
+    prefixes = []
+    if path != 'cpython':
+        prefixes.append(path)
+
     if len(parents) == 2:
         b1, b2, b = parents[0].branch(), parents[1].branch(), ctx.branch()
         if b in (b1, b2):
             bp = b2 if b == b1 else b1
             # normal case
-            branch_insert = ' (merge %s -> %s)' % (bp, b)
+            prefixes.append('(merge %s -> %s)' % (bp, b))
         else:
             # XXX really??
-            branch_insert = ' (merge %s + %s -> %s)' % (b1, b2, b)
+            prefixes.append('(merge %s + %s -> %s)' % (b1, b2, b))
     else:
         branch = ctx.branch()
-        if branch == 'default':
-            branch_insert = ''
-        else:
-            branch_insert = ' (%s)' % branch
+        if branch != 'default':
+            prefixes.append('(%s)' % branch)
 
     desc = ctx.description().splitlines()[0]
     if len(desc) > 80:
@@ -92,7 +94,12 @@ def incoming(ui, repo, **kwargs):
         if ' ' in desc:
             desc = desc.rsplit(' ', 1)[0]
 
-    subj = '%s%s: %s' % (path, branch_insert, desc)
+    if prefixes:
+        prefixes = ' '.join(prefixes) + ': '
+    else:
+        prefixes = ''
+
+    subj = prefixes + desc
 
     send(subj, FROM % user, to, '\n'.join(body) + '\n')
     print 'notified %s of incoming changeset %s' % (to, ctx)
