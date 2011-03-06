@@ -8,6 +8,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from mercurial import cmdutil, patch
 from mercurial.node import nullid
+from mercurial.encoding import fromlocal
 import smtplib
 import os
 
@@ -40,7 +41,7 @@ def incoming(ui, repo, **kwargs):
     body += [CSET_URL % (path, ctx)]
     body += [line for line in log.splitlines()[:-2]
              if line != 'tag:         tip']
-    body += ['summary:\n  ' + ctx.description(), '']
+    body += ['summary:\n  ' + fromlocal(ctx.description()), '']
     body += ['files:\n  ' + '\n  '.join(ctx.files()), '']
 
     diffopts = patch.diffopts(repo.ui, {'git': True, 'showfunc': True})
