@@ -28,6 +28,10 @@ def send(sub, sender, to, body):
     smtp.close()
 
 def incoming(ui, repo, **kwargs):
+    # Ensure that no fancying of output is enabled (e.g. coloring)
+    os.environ['TERM'] = 'dumb'
+    ui.setconfig('ui', 'interactive', 'False')
+    ui.setconfig('ui', 'formatted', 'False')
 
     displayer = cmdutil.changeset_printer(ui, repo, False, False, True)
     ctx = repo[kwargs['node']]

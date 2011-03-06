@@ -54,7 +54,7 @@ def sendchanges(master, changes):
         for k, v in change.items():
             # Yikes!
             if isinstance(v, localstr):
-                change[k] = fromlocal(v).decode('utf8')
+                change[k] = fromlocal(v).decode('utf8', 'replace')
         d.addCallback(send, change)
     d.addCallbacks(s.printSuccess, s.printFailure)
     d.addBoth(s.stop)
@@ -88,10 +88,11 @@ def hook(ui, repo, hooktype, node=None, source=None, **kwargs):
             # Explicitly compare current with its first parent (otherwise
             # some files might be "forgotten" if they are copied as-is from the
             # second parent).
-            modified, added, removed, deleted = repo.status(rev, p[0])[:4]
+            p1 = repo[hex(p[0])]
+            modified, added, removed, deleted = repo.status(rev, p1)[:4]
             files = set()
             for l in (modified, added, removed, deleted):
-                files.extend(l)
+                files.update(l)
             files = sorted(files)
             if not files:
                 # dummy merge, but at least one file is required by buildbot
@@ -101,7 +102,7 @@ def hook(ui, repo, hooktype, node=None, source=None, **kwargs):
         changes.append({
             'user': user,
             'revision': hex(node),
-            'comments': desc.decode('utf8', 'replace'),
+            'comments': desc,
             'revlink': (url % {'rev': hex(node)}) if url else '',
             'files': files,
             'branch': branch,
