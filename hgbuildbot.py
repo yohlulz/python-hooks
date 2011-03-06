@@ -84,9 +84,18 @@ def hook(ui, repo, hooktype, node=None, source=None, **kwargs):
         manifest, user, (time, timezone), files, desc, extra = repo.changelog.read(node)
         parents = [p for p in repo.changelog.parents(node) if p != nullid]
         branch = extra['branch']
-        # merges don't always contain files, but at least one file is required by buildbot
-        if len(parents) > 1 and not files:
-            files = ["merge"]
+        if len(parents) > 1:
+            # Explicitly compare current with its first parent (otherwise
+            # some files might be "forgotten" if they are copied as-is from the
+            # second parent).
+            modified, added, removed, deleted = repo.status(rev, p[0])[:4]
+            files = set()
+            for l in (modified, added, removed, deleted):
+                files.extend(l)
+            files = sorted(files)
+            if not files:
+                # dummy merge, but at least one file is required by buildbot
+                files.append("Misc/merge")
         # add artificial prefix if configured
         files = [prefix + f for f in files]
         changes.append({
