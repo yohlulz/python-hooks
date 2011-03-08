@@ -36,6 +36,7 @@ from string import Template
 from email.mime.text import MIMEText
 
 from mercurial.templatefilters import person
+from mercurial.encoding import fromlocal
 
 VERBS = r'(?:\b(?P<verb>close[sd]?|closing|)\s+)?'
 ISSUE_PATTERN = re.compile(r'%s(?:#|\bissue|\bbug)\s*(?P<issue_id>[0-9]{4,})'
@@ -77,20 +78,20 @@ def _update_issue(ui, repo, node, **kwargs):
 
     for rev in xrange(start, len(repo)):
         ctx = repo[rev]
-        description = ctx.description().strip()
+        description = fromlocal(ctx.description().strip())
         match = ISSUE_PATTERN.search(description)
         ui.debug('match in commit msg: %s\n' % (match and match.groupdict() or 'no'))
         if not match:
             continue
         data = match.groupdict()
         comment = Template(COMMENT_TEMPLATE).substitute({
-            'author': person(ctx.user()),
+            'author': fromlocal(person(ctx.user())),
             'branch': ctx.branch(),
             'changeset_id': str(ctx),
             'changeset_url': posixpath.join(repourl, str(ctx)),
             'commit_msg': description.splitlines()[0],
         })
-        add_comment(issues, ctx.user(), data, comment)
+        add_comment(issues, data, comment)
     if issues:
         try:
             send_comments(mailrelay, fromaddr, toaddr, issues)
@@ -104,7 +105,7 @@ def _update_issue(ui, repo, node, **kwargs):
         ui.debug("no issues to send to roundup\n")
     return False
 
-def add_comment(issues, user, data, comment):
+def add_comment(issues, data, comment):
     """Process a comment made in a commit message."""
     key = data['issue_id']
     if key in issues:
@@ -126,7 +127,8 @@ def send_comments(mailrelay, fromaddr, toaddr, issues):
             if data['properties']:
                 props = ' [%s]' % ';'.join('%s=%s' % x
                                            for x in data['properties'].iteritems())
-            msg = MIMEText('\n\n'.join(data['comments']))
+            msg = MIMEText('\n\n'.join(data['comments']),
+                           _subtype='plain', _charset='utf8')
             msg['From'] = fromaddr
             msg['To'] = toaddr
             msg['Subject'] = "[issue%s]%s" % (issue_id, props)
