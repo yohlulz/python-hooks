@@ -24,6 +24,8 @@ To use this hook, include the following in hgrc:
     repo = http://hg.python.org/cpython/
     toaddr = roundup-admin@example.com
     mailrelay = 127.0.0.1
+
+Initial implementation by Kelsey Hightower <kelsey.hightower@gmail.com>.
 """
 import re
 import smtplib
