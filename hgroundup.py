@@ -11,9 +11,8 @@ mention an issue anywhere in the commit message in the following way:
 
 where 12345 is the issue number.
 
-If "closes" or "fixes" (with alternative verb forms like "fixing"
-allowed too) is prepended, the issue is automatically closed as
-"fixed".
+If "closes" (with alternative verb forms like "closing" allowed too)
+is prepended, the issue is automatically closed as "fixed".
 
 To use this hook, include the following in hgrc:
 
@@ -21,9 +20,14 @@ To use this hook, include the following in hgrc:
     changegroup.roundup = python:hgroundup.update_issue
 
     [hgroundup]
-    repo = http://hg.python.org/cpython/rev/
+    fromaddr = roundup-user@example.com
     toaddr = roundup-admin@example.com
     mailrelay = 127.0.0.1
+
+`fromaddr` must be registered as the address of an existing Roundup user,
+otherwise Roundup will refuse and bounce the message.
+Also, you need either a `baseurl` property in the [web] section,
+or a `repourl` property in the [hgroundup] section.
 
 Initial implementation by Kelsey Hightower <kelsey.hightower@gmail.com>.
 """
