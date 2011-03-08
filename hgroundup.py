@@ -35,7 +35,7 @@ from string import Template
 from email.mime.text import MIMEText
 
 VERBS = r'(?:\b(?P<verb>close[sd]?|closing|fixe[sd]|fixing|fix)\s+)?'
-ISSUE_PATTERN = re.compile(r'%s(?:#|\bissue|\bbug)\s*(?P<issue_id>[0-9]+)'
+ISSUE_PATTERN = re.compile(r'%s(?:#|\bissue|\bbug)\s*(?P<issue_id>[0-9]{4,})'
                            % VERBS, re.I)
 COMMENT_TEMPLATE = "${commit_msg}\n${changeset_url}"
 
