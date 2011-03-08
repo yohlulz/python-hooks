@@ -21,7 +21,7 @@ To use this hook, include the following in hgrc:
     changegroup.roundup = python:hgroundup.update_issue
 
     [hgroundup]
-    repo = http://hg.python.org/cpython/
+    repo = http://hg.python.org/cpython/rev/
     toaddr = roundup-admin@example.com
     mailrelay = 127.0.0.1
 
