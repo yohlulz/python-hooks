@@ -70,9 +70,7 @@ def incoming(ui, repo, **kwargs):
         print 'no email address configured'
         return False
 
-    prefixes = []
-    if path != 'cpython':
-        prefixes.append(path)
+    prefixes = [path]
 
     if len(parents) == 2:
         b1, b2, b = parents[0].branch(), parents[1].branch(), ctx.branch()
