@@ -119,7 +119,8 @@ def add_comment(issues, data, comment):
     if data['verb']:
         issues[key]['properties'].update({
             'status': 'closed',
-            'resolution': 'fixed'
+            'resolution': 'fixed',
+            'stage': 'committed/rejected',
         })
 
 def send_comments(mailrelay, fromaddr, toaddr, issues):
