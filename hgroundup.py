@@ -120,7 +120,7 @@ def add_comment(issues, data, comment):
         issues[key]['properties'].update({
             'status': 'closed',
             'resolution': 'fixed',
-            #'stage': 'committed/rejected',
+            'stage': 'committed/rejected',
         })
 
 def send_comments(mailrelay, fromaddr, toaddr, issues):
