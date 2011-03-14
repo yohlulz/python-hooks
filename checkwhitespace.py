@@ -3,8 +3,8 @@ Mercurial hooks to check changegroups and individual changesets for
 whitespace issues.
 
 To use the changeset hook in a local repository, include something like the
-following in your hgrc file, and make sure that this file (i.e.,
-check_whitespace.py) is in your PYTHONPATH.
+following in your hgrc file, and make sure that this file (check_whitespace.py)
+and reindent.py are in your PYTHONPATH.
 
 [hooks]
 pretxncommit.whitespace = python:checkwhitespace.check_whitespace_single
