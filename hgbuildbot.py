@@ -84,6 +84,9 @@ def hook(ui, repo, hooktype, node=None, source=None, **kwargs):
         manifest, user, (time, timezone), files, desc, extra = repo.changelog.read(node)
         parents = [p for p in repo.changelog.parents(node) if p != nullid]
         branch = extra['branch']
+        if branch in ['2.5', '2.6']:
+            # No buildbot category for these branches
+            continue
         if len(parents) > 1:
             # Explicitly compare current with its first parent (otherwise
             # some files might be "forgotten" if they are copied as-is from the
