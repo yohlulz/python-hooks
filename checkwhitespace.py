@@ -4,10 +4,10 @@ whitespace issues.
 
 To use the changeset hook in a local repository, include something like the
 following in your hgrc file, and make sure that this file (check_whitespace.py)
-and reindent.py are in your PYTHONPATH.
+and reindent.py are in the same directory.
 
 [hooks]
-pretxncommit.whitespace = python:checkwhitespace.check_whitespace_single
+pretxncommit.whitespace = python:/home/hg/repos/hooks/checkwhitespace.py:check_whitespace_single
 """
 
 # Mercurial hooks are not run with the hook's directory in sys.path
