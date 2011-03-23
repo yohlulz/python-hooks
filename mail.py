@@ -62,9 +62,10 @@ def incoming(ui, repo, **kwargs):
     node1 = parents and parents[0].node() or nullid
     node2 = ctx.node()
     diffchunks = list(patch.diff(repo, node1, node2, opts=diffopts))
-    body.append(''.join(line for line in
-                        patch.diffstat(iterlines(diffchunks), width=60, git=True)
-                        ))
+    diffstat = patch.diffstat(iterlines(diffchunks), width=60, git=True)
+    for line in iterlines([''.join(diffstat)]):
+        body.append(' ' + line)
+    body += ['', '']
     body.append(''.join(chunk for chunk in diffchunks))
 
     body.append('-- ')
