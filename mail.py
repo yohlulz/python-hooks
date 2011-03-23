@@ -9,6 +9,7 @@ from email.mime.text import MIMEText
 from mercurial import cmdutil, patch
 from mercurial.node import nullid
 from mercurial.encoding import fromlocal
+from mercurial.util import iterlines
 import smtplib
 import os
 import sys
@@ -52,15 +53,19 @@ def incoming(ui, repo, **kwargs):
     body += [CSET_URL % (path, ctx)]
     body += [line for line in log.splitlines()[:-2]
              if line != 'tag:         tip']
-    body += ['summary:\n  ' + fromlocal(ctx.description()), '']
-    body += ['files:\n  ' + '\n  '.join(ctx.files()), '']
+    body += ['summary:\n  ' + fromlocal(ctx.description())]
+    # ctx.files() gives us misleading info on merges, we use a diffstat instead
+    body += ['', 'files:']
 
     diffopts = patch.diffopts(repo.ui, {'git': True, 'showfunc': True})
     parents = ctx.parents()
     node1 = parents and parents[0].node() or nullid
     node2 = ctx.node()
-    differ = patch.diff(repo, node1, node2, opts=diffopts)
-    body.append(''.join(chunk for chunk in differ))
+    diffchunks = list(patch.diff(repo, node1, node2, opts=diffopts))
+    body.append(''.join(line for line in
+                        patch.diffstat(iterlines(diffchunks), width=60, git=True)
+                        ))
+    body.append(''.join(chunk for chunk in diffchunks))
 
     body.append('-- ')
     body.append('Repository URL: %s%s' % (BASE, path))
