@@ -44,7 +44,7 @@ def sendchanges(master, changes):
     # send change information to one master
     from buildbot.clients import sendchange
 
-    s = sendchange.Sender(master, None)
+    s = sendchange.Sender(master)
     d = defer.Deferred()
     reactor.callLater(0, d.callback, None)
     
@@ -103,7 +103,7 @@ def hook(ui, repo, hooktype, node=None, source=None, **kwargs):
         # add artificial prefix if configured
         files = [prefix + f for f in files]
         changes.append({
-            'user': user,
+            'who': user,
             'revision': hex(node),
             'comments': desc,
             'revlink': (url % {'rev': hex(node)}) if url else '',
