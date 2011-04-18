@@ -16,7 +16,6 @@ import sys
 
 BASE = 'http://hg.python.org/'
 CSET_URL = BASE + '%s/rev/%s'
-FROM = '%s <python-checkins@python.org>'
 
 def send(sub, sender, to, body):
     msg = MIMEMultipart()
@@ -75,6 +74,7 @@ def incoming(ui, repo, **kwargs):
     if to is None:
         print 'no email address configured'
         return False
+    sender = '%s <%s>' % (user, to)
 
     prefixes = [path]
 
@@ -105,7 +105,7 @@ def incoming(ui, repo, **kwargs):
 
     subj = prefixes + desc
 
-    send(subj, FROM % user, to, '\n'.join(body) + '\n')
+    send(subj, sender, to, '\n'.join(body) + '\n')
     print 'notified %s of incoming changeset %s' % (to, ctx)
     return False
 
