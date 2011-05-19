@@ -4,6 +4,7 @@ Mercurial hook to send an email for each changeset to a specified address.
 For use as an "incoming" hook.
 """
 
+from email.header import Header
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from mercurial import cmdutil, patch
@@ -13,22 +14,23 @@ from mercurial.util import iterlines
 import smtplib
 import os
 import sys
+import traceback
 
 BASE = 'http://hg.python.org/'
 CSET_URL = BASE + '%s/rev/%s'
 
 def send(sub, sender, to, body):
     msg = MIMEMultipart()
-    msg['Subject'] = sub
+    msg['Subject'] = Header(sub, 'utf8')
     msg['To'] = to
     msg['From'] = sender
     msg.attach(MIMEText(body, _subtype='plain', _charset='utf8'))
     smtp = smtplib.SMTP()
     smtp.connect()
-    smtp.sendmail(sender, msg['To'], msg.as_string())
+    smtp.sendmail(sender, to, msg.as_string())
     smtp.close()
 
-def incoming(ui, repo, **kwargs):
+def _incoming(ui, repo, **kwargs):
     # Ensure that no fancying of output is enabled (e.g. coloring)
     os.environ['TERM'] = 'dumb'
     ui.setconfig('ui', 'interactive', 'False')
@@ -108,4 +110,12 @@ def incoming(ui, repo, **kwargs):
     send(subj, sender, to, '\n'.join(body) + '\n')
     print 'notified %s of incoming changeset %s' % (to, ctx)
     return False
+
+def incoming(ui, repo, **kwargs):
+    # Make error reporting easier
+    try:
+        return _incoming(ui, repo, **kwargs)
+    except:
+        traceback.print_exc()
+        raise
 
