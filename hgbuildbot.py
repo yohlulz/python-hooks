@@ -20,6 +20,7 @@
 
 import os
 import sys
+from cStringIO import StringIO
 
 from mercurial.i18n import gettext as _
 from mercurial.node import bin, hex, nullid
@@ -110,8 +111,16 @@ def hook(ui, repo, hooktype, node=None, source=None, **kwargs):
             'files': files,
             'branch': branch,
         })
- 
-    for master in masters:
-        sendchanges(master, changes)
-    reactor.run()
+
+    old_stdout = sys.stdout
+    new_stdout = sys.stdout = StringIO()
+    try:
+        for master in masters:
+            sendchanges(master, changes)
+        reactor.run()
+    finally:
+        sys.stdout = old_stdout
+        new_stdout.seek(0)
+        for s in new_stdout:
+            ui.status(s)
 
