@@ -122,5 +122,5 @@ def hook(ui, repo, hooktype, node=None, source=None, **kwargs):
         sys.stdout = old_stdout
         new_stdout.seek(0)
         for s in new_stdout:
-            ui.status(s)
+            ui.status("buildbot: " + s)
 
