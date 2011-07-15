@@ -108,7 +108,7 @@ def _incoming(ui, repo, **kwargs):
     subj = prefixes + desc
 
     send(subj, sender, to, '\n'.join(body) + '\n')
-    print 'notified %s of incoming changeset %s' % (to, ctx)
+    ui.status('notified %s of incoming changeset %s\n' % (to, ctx))
     return False
 
 def incoming(ui, repo, **kwargs):
