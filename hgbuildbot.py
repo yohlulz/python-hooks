@@ -41,7 +41,7 @@ from twisted.internet import defer, reactor
 sys.path.append('/data/buildbot/lib/python')
 
 
-def sendchanges(master, changes):
+def sendchanges(ui, master, changes):
     # send change information to one master
     from buildbot.clients import sendchange
 
@@ -56,6 +56,8 @@ def sendchanges(master, changes):
             # Yikes!
             if isinstance(v, localstr):
                 change[k] = fromlocal(v).decode('utf8', 'replace')
+            elif isinstance(v, str):
+                change[k] = v.decode('utf8', 'replace')
         d.addCallback(send, change)
     d.addCallbacks(s.printSuccess, s.printFailure)
     d.addBoth(s.stop)
@@ -116,7 +118,7 @@ def hook(ui, repo, hooktype, node=None, source=None, **kwargs):
     new_stdout = sys.stdout = StringIO()
     try:
         for master in masters:
-            sendchanges(master, changes)
+            sendchanges(ui, master, changes)
         reactor.run()
     finally:
         sys.stdout = old_stdout
