@@ -76,7 +76,10 @@ def _incoming(ui, repo, **kwargs):
     if to is None:
         print 'no email address configured'
         return False
-    sender = '%s <%s>' % (user, to)
+    from_ = ui.config('mail', 'sender', None)
+    if from_ is None:
+        from_ = to
+    sender = '%s <%s>' % (user, from_)
 
     prefixes = [path]
 
