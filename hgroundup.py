@@ -1,7 +1,7 @@
 """Mercurial hook to update a Roundup issue.
 
-Update a Roundup issue via email for changesets where commit messages
-mention an issue anywhere in the commit message in the following way:
+Update Roundup issue(s) via email for changesets where commit messages
+mention one or more issues anywhere in the commit message in the following way:
 
    #12345
    issue12345
@@ -83,19 +83,23 @@ def _update_issue(ui, repo, node, **kwargs):
     for rev in xrange(start, len(repo)):
         ctx = repo[rev]
         description = fromlocal(ctx.description().strip())
-        match = ISSUE_PATTERN.search(description)
-        ui.debug('match in commit msg: %s\n' % (match and match.groupdict() or 'no'))
-        if not match:
-            continue
-        data = match.groupdict()
-        comment = Template(COMMENT_TEMPLATE).substitute({
-            'author': fromlocal(person(ctx.user())),
-            'branch': ctx.branch(),
-            'changeset_id': str(ctx),
-            'changeset_url': posixpath.join(repourl, str(ctx)),
-            'commit_msg': description.splitlines()[0],
-        })
-        add_comment(issues, data, comment)
+        matches = ISSUE_PATTERN.finditer(description)
+        ids = set()
+        for match in matches:
+            data = match.groupdict()
+            ui.debug('match in commit msg: %s\n' % data)
+            # check for duplicated issue numbers in the same commit msg
+            if data['issue_id'] in ids:
+                continue
+            ids.add(data['issue_id'])
+            comment = Template(COMMENT_TEMPLATE).substitute({
+                'author': fromlocal(person(ctx.user())),
+                'branch': ctx.branch(),
+                'changeset_id': str(ctx),
+                'changeset_url': posixpath.join(repourl, str(ctx)),
+                'commit_msg': description.splitlines()[0],
+            })
+            add_comment(issues, data, comment)
     if issues:
         try:
             send_comments(mailrelay, fromaddr, toaddr, issues)
