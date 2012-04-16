@@ -30,6 +30,20 @@ def send(sub, sender, to, body):
     smtp.sendmail(sender, to, msg.as_string())
     smtp.close()
 
+def strip_bin_diffs(chunks):
+    stripped = []
+    for chunk in chunks:
+        lines = chunk.splitlines(True)
+        try:
+            i = lines.index('GIT binary patch\n')
+        except ValueError:
+            pass
+        else:
+            lines = lines[:i+1] + ['[stripped]\n']
+            chunk = ''.join(lines)
+        stripped.append(chunk)
+    return stripped
+
 def _incoming(ui, repo, **kwargs):
     # Ensure that no fancying of output is enabled (e.g. coloring)
     os.environ['TERM'] = 'dumb'
@@ -67,6 +81,7 @@ def _incoming(ui, repo, **kwargs):
     for line in iterlines([''.join(diffstat)]):
         body.append(' ' + line)
     body += ['', '']
+    diffchunks = strip_bin_diffs(diffchunks)
     body.append(''.join(chunk for chunk in diffchunks))
 
     body.append('-- ')
