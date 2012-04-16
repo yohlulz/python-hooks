@@ -35,7 +35,8 @@ def strip_bin_diffs(chunks):
     for chunk in chunks:
         lines = chunk.splitlines(True)
         try:
-            i = lines.index('GIT binary patch\n')
+            # This is the second or third line usually
+            i = lines.index('GIT binary patch\n', 0, 4)
         except ValueError:
             pass
         else:
