@@ -19,6 +19,7 @@ import traceback
 BASE = 'http://hg.python.org/'
 CSET_URL = BASE + '%s/rev/%s'
 
+
 def send(sub, sender, to, body):
     msg = MIMEMultipart()
     msg['Subject'] = Header(sub, 'utf8')
@@ -45,6 +46,19 @@ def strip_bin_diffs(chunks):
         stripped.append(chunk)
     return stripped
 
+def strip_blacklisted_files(chunks, blacklisted):
+    stripped = []
+    for chunk in chunks:
+        lines = chunk.splitlines(True)
+        for i, line in enumerate(lines[:4]):
+            if (line.startswith('+++ b/') and
+                line[6:].rstrip() in blacklisted):
+                lines = lines[:i+1] + ['[stripped]\n']
+                chunk = ''.join(lines)
+                break
+        stripped.append(chunk)
+    return stripped
+
 def _incoming(ui, repo, **kwargs):
     # Ensure that no fancying of output is enabled (e.g. coloring)
     os.environ['TERM'] = 'dumb'
@@ -56,6 +70,8 @@ def _incoming(ui, repo, **kwargs):
         pass
     else:
         colormod._styles.clear()
+
+    blacklisted = ui.config('mail', 'diff-blacklist', '').split()
 
     displayer = cmdutil.changeset_printer(ui, repo, False, False, True)
     ctx = repo[kwargs['node']]
@@ -83,6 +99,7 @@ def _incoming(ui, repo, **kwargs):
         body.append(' ' + line)
     body += ['', '']
     diffchunks = strip_bin_diffs(diffchunks)
+    diffchunks = strip_blacklisted_files(diffchunks, blacklisted)
     body.append(''.join(chunk for chunk in diffchunks))
 
     body.append('-- ')
