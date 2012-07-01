@@ -69,7 +69,9 @@ def _update_issue(ui, repo, node, **kwargs):
         repourl = posixpath.join(ui.config('web', 'baseurl'), 'rev/')
     fromaddr = ui.config('hgroundup', 'fromaddr')
     toaddr = ui.config('hgroundup', 'toaddr')
-    mailrelay = ui.config('hgroundup', 'mailrelay', default='127.0.0.1')
+    mailrelay = ui.config('hgroundup', 'mailrelay', default='')
+    if not mailrelay:
+        mailrelay = ui.config('smtp', 'host', default='')
     for var in ('repourl', 'fromaddr', 'toaddr'):
         if not locals()[var]:
             raise RuntimeError(

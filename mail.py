@@ -2,6 +2,14 @@
 Mercurial hook to send an email for each changeset to a specified address.
 
 For use as an "incoming" hook.
+
+To set the SMTP server to something other than localhost, add a [smtp]
+section to your hgrc:
+
+[smtp]
+host = mail.python.org
+port = 25
+
 """
 
 from email.header import Header
@@ -20,16 +28,13 @@ BASE = 'http://hg.python.org/'
 CSET_URL = BASE + '%s/rev/%s'
 
 
-def send(sub, sender, to, body):
+def send(smtp, sub, sender, to, body):
     msg = MIMEMultipart()
     msg['Subject'] = Header(sub, 'utf8')
     msg['To'] = to
     msg['From'] = sender
     msg.attach(MIMEText(body, _subtype='plain', _charset='utf8'))
-    smtp = smtplib.SMTP()
-    smtp.connect()
     smtp.sendmail(sender, to, msg.as_string())
-    smtp.close()
 
 def strip_bin_diffs(chunks):
     stripped = []
@@ -143,7 +148,12 @@ def _incoming(ui, repo, **kwargs):
 
     subj = prefixes + desc
 
-    send(subj, sender, to, '\n'.join(body) + '\n')
+    host = ui.config('smtp', 'host', '')
+    port = int(ui.config('smtp', 'port', 0))
+    smtp = smtplib.SMTP(host, port)
+    send(smtp, subj, sender, to, '\n'.join(body) + '\n')
+    smtp.close()
+
     ui.status('notified %s of incoming changeset %s\n' % (to, ctx))
     return False
 

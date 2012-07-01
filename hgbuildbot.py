@@ -59,8 +59,16 @@ def sendchanges(ui, master, changes):
             elif isinstance(v, str):
                 change[k] = v.decode('utf8', 'replace')
         d.addCallback(send, change)
-    d.addCallbacks(s.printSuccess, s.printFailure)
-    d.addBoth(s.stop)
+
+    def printSuccess(res):
+        print "change(s) sent successfully"
+
+    def printFailure(why):
+        print "change(s) NOT sent, something went wrong:"
+        print why
+
+    d.addCallbacks(printSuccess, printFailure)
+    d.addBoth(lambda _: reactor.stop())
 
 
 def hook(ui, repo, hooktype, node=None, source=None, **kwargs):
