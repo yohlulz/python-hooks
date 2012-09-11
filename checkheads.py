@@ -9,8 +9,6 @@ following in its hgrc file.
 pretxnchangegroup.checkheads = python:/home/hg/repos/hooks/checkheads.py:hook
 """
 
-from collections import defaultdict
-
 from mercurial.node import bin, nullrev
 from mercurial import util
 
@@ -24,7 +22,7 @@ def hook(ui, repo, node, **kwargs):
     newcsets = range(start, end)
     # The rev numbers of the changegroup parents (not in the changegroup)
     parents = set()
-    
+
     for n in newcsets:
         for p in changelog.parentrevs(n):
             if p == nullrev:
@@ -51,5 +49,3 @@ def hook(ui, repo, node, **kwargs):
             ui.warn('* Please run "hg pull" and then merge at least two of:\n')
             ui.warn('* ' + ', '.join(str(repo[h]) for h in pheads) + '\n')
             return True
-
-
