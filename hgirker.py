@@ -14,7 +14,7 @@ DEFTEMPLATE = '''%(bold)s%(project)s:%(bold)s \
 %(yellow)s%(branch)s%(reset)s \
 * %(bold)s%(rev)s%(bold)s \
 / %(files)s%(bold)s:%(bold)s %(logmsg)s \
-%(brown)s%(url)s%(reset)s'''
+%(gray)s%(url)s%(reset)s'''
 
 def getenv(ui, repo):
     env = {
@@ -23,6 +23,7 @@ def getenv(ui, repo):
         'blue': '\x032',
         'yellow': '\x037',
         'brown': '\x035',
+        'gray': '\x0314',
         'reset': '\x0F'
     }
     env['repo'] = repo
