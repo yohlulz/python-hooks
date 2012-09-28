@@ -19,10 +19,10 @@ DEFTEMPLATE = '''%(bold)s%(project)s:%(bold)s \
 def getenv(ui, repo):
     env = {
         'bold': '\x02',
-        'green': '\x033',
-        'blue': '\x032',
-        'yellow': '\x037',
-        'brown': '\x035',
+        'green': '\x0303',
+        'blue': '\x0302',
+        'yellow': '\x0307',
+        'brown': '\x0305',
         'gray': '\x0314',
         'reset': '\x0F'
     }
