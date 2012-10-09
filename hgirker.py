@@ -54,7 +54,10 @@ def generate(env, ctx):
     d['branch'] = ctx.branch()
     d['author'] = person(ctx.user())
     d['rev'] = '%d:%s' % (ctx.rev(), ns)
-    d['logmsg'] = ctx.description()
+    logmsg = filter(None, ctx.description().splitlines())
+    d['logmsg'] = ' '.join(logmsg[:4])
+    if len(logmsg) > 4:
+        d['logmsg'] += '...'
     if env['baseurl']:
         d['url'] = env['baseurl'].rstrip('/') + '/rev/%s' % ns
     else:
