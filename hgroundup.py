@@ -22,7 +22,6 @@ To use this hook, include the following in hgrc:
     [hgroundup]
     fromaddr = roundup-user@example.com
     toaddr = roundup-admin@example.com
-    mailrelay = 127.0.0.1
 
 `fromaddr` must be registered as the address of an existing Roundup user,
 otherwise Roundup will refuse and bounce the message.
@@ -69,9 +68,6 @@ def _update_issue(ui, repo, node, **kwargs):
         repourl = posixpath.join(ui.config('web', 'baseurl'), 'rev/')
     fromaddr = ui.config('hgroundup', 'fromaddr')
     toaddr = ui.config('hgroundup', 'toaddr')
-    mailrelay = ui.config('hgroundup', 'mailrelay', default='')
-    if not mailrelay:
-        mailrelay = ui.config('smtp', 'host', default='')
     for var in ('repourl', 'fromaddr', 'toaddr'):
         if not locals()[var]:
             raise RuntimeError(
@@ -103,6 +99,13 @@ def _update_issue(ui, repo, node, **kwargs):
             })
             add_comment(issues, data, comment)
     if issues:
+        smtp_host = ui.config('smtp', 'host', default='localhost')
+        smtp_port = int(ui.config('smtp', 'port', 25))
+        s = smtplib.SMTP(smtp_host, smtp_port)
+        username = ui.config('smtp', 'username', '')
+        if username:
+          password = ui.config('smtp', 'password', '')
+          s.login(username, password)
         try:
             send_comments(mailrelay, fromaddr, toaddr, issues)
             ui.status("sent email to roundup at " + toaddr + '\n')
@@ -129,9 +132,8 @@ def add_comment(issues, data, comment):
             'stage': 'resolved',
         })
 
-def send_comments(mailrelay, fromaddr, toaddr, issues):
+def send_comments(s, fromaddr, toaddr, issues):
     """Update the Roundup issue with a comment and changeset link."""
-    s = smtplib.SMTP(mailrelay)
     try:
         for issue_id, data in issues.iteritems():
             props = ''
