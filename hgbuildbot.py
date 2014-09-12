@@ -48,7 +48,7 @@ def sendchanges(ui, master, changes):
     s = sendchange.Sender(master)
     d = defer.Deferred()
     reactor.callLater(0, d.callback, None)
-    
+
     def send(res, c):
         return s.send(**c)
     for change in changes:
