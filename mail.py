@@ -151,6 +151,9 @@ def _incoming(ui, repo, **kwargs):
     host = ui.config('smtp', 'host', '')
     port = int(ui.config('smtp', 'port', 0))
     smtp = smtplib.SMTP(host, port)
+    username = ui.config('smtp', 'username', '')
+    if username:
+        smtp.login(username, ui.config('smtp', 'password', ''))
     send(smtp, subj, sender, to, '\n'.join(body) + '\n')
     smtp.close()
 
