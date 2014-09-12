@@ -38,8 +38,6 @@ except ImportError:
 
 from twisted.internet import defer, reactor
 
-sys.path.append('/data/buildbot/lib/python')
-
 
 def sendchanges(ui, master, changes):
     # send change information to one master
