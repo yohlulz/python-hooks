@@ -107,7 +107,7 @@ def _update_issue(ui, repo, node, **kwargs):
           password = ui.config('smtp', 'password', '')
           s.login(username, password)
         try:
-            send_comments(mailrelay, fromaddr, toaddr, issues)
+            send_comments(s, fromaddr, toaddr, issues)
             ui.status("sent email to roundup at " + toaddr + '\n')
         except Exception, err:
             # make sure an issue updating roundup does not prevent an
