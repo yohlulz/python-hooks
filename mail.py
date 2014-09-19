@@ -24,7 +24,7 @@ import os
 import sys
 import traceback
 
-BASE = 'http://hg.python.org/'
+BASE = 'https://hg.python.org/'
 CSET_URL = BASE + '%s/rev/%s'
 
 
