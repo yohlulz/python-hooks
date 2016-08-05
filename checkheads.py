@@ -14,6 +14,11 @@ from mercurial import util
 
 
 def hook(ui, repo, node, **kwargs):
+    source = kwargs['source']
+
+    if source not in ('push', 'serve'):
+        return False
+
     changelog = repo.changelog
     # rev number of the first new cset
     start = changelog.rev(bin(node))
